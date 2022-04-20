@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../EmployeeAPIM_1.0.0_java_O/target/lib" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/../EmployeeAPIM_1.0.0_java_O/target/lib" recursive="false" />
+  </library>
+</component>
