@@ -43,14 +43,12 @@ class API{
     public void listEmployee(DefaultApi apiobj){
         try{
             EmpArr arr = apiobj.listGet();
-//            System.out.println(arr.getData());
             JSONObject payLoad = new JSONObject(arr);
             JSONArray data= payLoad.getJSONArray("data");
             System.out.println("Raw: "+data);
 
             for(int i=0;i<data.length();i++) {
                 JSONObject obj = data.getJSONObject(i);
-//                System.out.println(obj.get("salary"));
                 String decryptedString = this.cipherAPI.decrypt(obj.get("salary").toString());
                 obj.put("salary",decryptedString);
             }
@@ -63,6 +61,8 @@ class API{
             System.out.println("Reason: " + e.getResponseBody());
         }
     }
+
+
     public static void updateEmployee(DefaultApi apiobj,String eid,String col,String val){
         Update update=new Update();
         update.eid(eid);
