@@ -1,0 +1,17 @@
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="ehcache.xsd">
+
+    <diskStore path="C:/mycache" />
+
+    <cache
+            name="tokenCache"
+            maxElementsInMemory="500"
+            eternal="true"
+            overflowToDisk="true"
+            timeToIdleSeconds="1000"
+            timeToLiveSeconds="3600"
+            diskPersistent="true"
+            diskExpiryThreadIntervalSeconds="1"
+            memoryStoreEvictionPolicy="LFU" />
+
+</ehcache>
