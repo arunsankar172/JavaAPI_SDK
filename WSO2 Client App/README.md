@@ -15,7 +15,7 @@
 
 ##### If Using IntelliJ IDEA use the following method to input inline arguments (Windows)
 
-- ALT+SHIFT+F10, Type 0.
+- ALT+SHIFT+F10, Press 0.
 - Enter your Arguments in "Program Arguments" box and Run.
 - Eg: `create <employeeId> <employeeName> <contact> <email> <salary>`
 
