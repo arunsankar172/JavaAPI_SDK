@@ -1,8 +1,15 @@
 import okhttp3.*;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import net.sf.ehcache.Cache;
@@ -20,7 +27,7 @@ import org.wso2.client.model.EmployeeAPIM.Update;
 
 import javax.net.ssl.*;
 
-public class API {
+public class APIWithSSL {
 
     public CacheManager cacheManager;
     public Cache cache;
@@ -28,7 +35,7 @@ public class API {
     public DefaultApi defaultApi;
     public ApiClient apiClient;
 
-    public API() {
+    public APIWithSSL() {
         try (InputStream input = new FileInputStream("app.properties")) {
             this.appProperty = new Properties();
             this.appProperty.load(input);
@@ -97,73 +104,38 @@ public class API {
         apiClient.setBasePath(appProperty.getProperty("httpEndpoint"));
     }
 
-        //Method to Skip SSL certificate verification while invoking Token API return OkHttp client without Hostname Verifier
-        private static OkHttpClient unsafeOkHttpClient() {
-            try {
-                // Create a trust manager that does not validate certificate chains
-                final TrustManager[] trustAllCerts = new TrustManager[]{
-                        new X509TrustManager() {
-                            @Override
-                            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-                            }
+    public String getTokenFromServer() throws Exception {
+       HttpClient httpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_2)
+                .build();
+        String base64Encoded = "Basic " + new String(Base64.encodeBase64((appProperty.getProperty("consumerKey")+ ":" +appProperty.getProperty("consumerSecret")).getBytes()));
+        Map<Object, Object> data = new HashMap<>();
+        data.put("grant_type", "client_credentials");
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(buildFormDataFromMap(data))
+                .uri(URI.create("https://wso2.southindia.cloudapp.azure.com:8243/token"))
+                .header("Authorization", base64Encoded)
+                .build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        JSONObject accessTokenJSON =new JSONObject(response.body().toString());
+        return accessTokenJSON.get("access_token").toString();
+    }
 
-                            @Override
-                            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-                            }
-
-                            @Override
-                            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                                return new java.security.cert.X509Certificate[]{};
-                            }
-                        }
-                };
-                // Install the all-trusting trust manager
-                final SSLContext sslContext = SSLContext.getInstance("SSL");
-                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-                // Create an ssl socket factory with our all-trusting manager
-                final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-                OkHttpClient.Builder builder = new OkHttpClient.Builder();
-                builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
-                builder.hostnameVerifier(new HostnameVerifier() {
-                    @Override
-                    public boolean verify(String hostname, SSLSession session) {
-                        return true;
-                    }
-                });
-
-                OkHttpClient okHttpClient = builder.build();
-                return okHttpClient;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+    private static HttpRequest.BodyPublisher buildFormDataFromMap(Map<Object, Object> data) {
+        var builder = new StringBuilder();
+        for (Map.Entry<Object, Object> entry : data.entrySet()) {
+            if (builder.length() > 0) {
+                builder.append("&");
             }
+            builder.append(URLEncoder.encode(entry.getKey().toString(), StandardCharsets.UTF_8));
+            builder.append("=");
+            builder.append(URLEncoder.encode(entry.getValue().toString(), StandardCharsets.UTF_8));
         }
-
-        //Get new Token from Token Endpoint using OkHttp client
-        public String getTokenFromServer() throws IOException {
-            OkHttpClient client = unsafeOkHttpClient();
-//            Encode consumerKey and consumerSecret in Base64 format
-            String base64Encoded = "Basic " + new String(Base64.encodeBase64((appProperty.getProperty("consumerKey")+ ":" +appProperty.getProperty("consumerSecret")).getBytes()));
-            RequestBody formBody = new FormBody.Builder()
-                    .addEncoded("grant_type", URLEncoder.encode("client_credentials", "UTF-8"))
-                    .build();
-//          Create new Request
-            Request request = new Request.Builder()
-                    .url(appProperty.getProperty("tokenEndpoint"))
-                    .post(formBody)
-                    .addHeader("Content-Type", " application/x-www-form-urlencoded")
-                    .addHeader("Authorization", base64Encoded)
-                    .build();
-            Response response = client.newCall(request).execute();
-                if (!response.isSuccessful()){
-//                    System.out.println(response.code());
-                }
-                JSONObject accessTokenJSON = new JSONObject(response.body().string());
-//            Return Access Token from response json as string
-                return accessTokenJSON.get("access_token").toString();
-        }
+        return HttpRequest.BodyPublishers.ofString(builder.toString());
+    }
 
 }
-class APILogic extends API{
+class APILogicWithSSL extends APIWithSSL{
     //GET method to get all data from database
     public void listEmployee(){
         try{

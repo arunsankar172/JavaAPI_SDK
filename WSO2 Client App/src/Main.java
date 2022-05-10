@@ -1,8 +1,27 @@
 class Main{
+
     public static void main(String[] args) {
+//GET Method/List
+//list
+
+//POST/Create
+//create <employeeId> <employeeName> <contact> <email> <salary>
+
+//PUT/Update
+//update <employeeId> <column> <value>
+
+//DELETE/Delete
+//delete <employeeId>
+
+//POST/Add Resume (upload)
+//upload <employeeId> <filePath>
+
+//GET/Download Resume (download)
+//download <employeeId>
+
         if(args.length>0) {
             System.out.println(args.length);
-            APILogic apiLogic = new APILogic();
+            APILogicWithSSL apiLogic = new APILogicWithSSL();
             switch (args[0]) {
                 case "list":
                     apiLogic.listEmployee();
@@ -37,6 +56,8 @@ class Main{
                     System.out.println("Invalid Parameters");
             }
         }
+
     }
+
 
 }
