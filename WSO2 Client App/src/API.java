@@ -3,6 +3,7 @@ import okhttp3.*;
 import java.io.*;
 import java.net.URLEncoder;
 import java.security.cert.CertificateException;
+import java.util.List;
 import java.util.Properties;
 
 import net.sf.ehcache.Cache;
@@ -14,7 +15,7 @@ import org.json.JSONObject;
 import org.wso2.client.api.ApiClient;
 import org.wso2.client.api.ApiException;
 import org.wso2.client.api.EmployeeAPIM.DefaultApi;
-import org.wso2.client.model.EmployeeAPIM.EmpArr;
+//import org.wso2.client.model.EmployeeAPIM.EmpArr;
 import org.wso2.client.model.EmployeeAPIM.Employee;
 import org.wso2.client.model.EmployeeAPIM.Update;
 
@@ -167,10 +168,10 @@ class APILogic extends API{
     //GET method to get all data from database
     public void listEmployee(){
         try{
-            EmpArr arr = defaultApi.listGet();
-            JSONObject payLoad = new JSONObject(arr);
-            JSONArray data= payLoad.getJSONArray("data");
-            System.out.println("Raw: "+data);
+            System.out.println(defaultApi.listGet());
+//            JSONObject payLoad = new JSONObject(arr);
+//            JSONArray data= payLoad.getJSONArray("data");
+//            System.out.println("Raw: "+data);
 //            for(int i=0;i<data.length();i++) {
 //                JSONObject obj = data.getJSONObject(i);
 //                String decryptedString = this.cipherAPI.decrypt(obj.get("salary").toString());
@@ -195,14 +196,14 @@ class APILogic extends API{
 //        String encryptedString = this.cipherAPI.encrypt(sal);
 //        employee.salary(encryptedString);
         employee.salary(salary);
-        employee.resume("");
-        try{
-            Employee res=this.defaultApi.createPost(employee);
-            System.out.println(res);
-        } catch (ApiException e) {
-            System.out.println("Status code: " + e.getCode());
-            System.out.println("Reason: " + e.getResponseBody());
-        }
+//        employee.resume("");
+//        try{
+////            this.defaultApi.createPost(employee);
+////            System.out.println(res);
+//        } catch (ApiException e) {
+//            System.out.println("Status code: " + e.getCode());
+//            System.out.println("Reason: " + e.getResponseBody());
+//        }
 
     }
 

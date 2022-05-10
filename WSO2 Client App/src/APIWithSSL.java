@@ -1,5 +1,4 @@
 import okhttp3.*;
-
 import java.io.*;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -9,6 +8,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -18,11 +18,14 @@ import net.sf.ehcache.Element;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.wso2.client.api.*;
 import org.wso2.client.api.ApiClient;
 import org.wso2.client.api.ApiException;
 import org.wso2.client.api.EmployeeAPIM.DefaultApi;
-import org.wso2.client.model.EmployeeAPIM.EmpArr;
+//import org.wso2.client.model.EmployeeAPIM.EmpArr;
 import org.wso2.client.model.EmployeeAPIM.Employee;
+import org.wso2.client.model.EmployeeAPIM.EmployeeList;
+import org.wso2.client.model.EmployeeAPIM.EmployeePost;
 import org.wso2.client.model.EmployeeAPIM.Update;
 
 import javax.net.ssl.*;
@@ -136,21 +139,20 @@ public class APIWithSSL {
 
 }
 class APILogicWithSSL extends APIWithSSL{
+    private AES256Cipher cipherAPI;
+
+
+    APILogicWithSSL(){
+        this.cipherAPI = new AES256Cipher();
+    }
+
     //GET method to get all data from database
     public void listEmployee(){
         try{
-            EmpArr arr = defaultApi.listGet();
-            JSONObject payLoad = new JSONObject(arr);
-            JSONArray data= payLoad.getJSONArray("data");
-            System.out.println("Raw: "+data);
-//            for(int i=0;i<data.length();i++) {
-//                JSONObject obj = data.getJSONObject(i);
-//                String decryptedString = this.cipherAPI.decrypt(obj.get("salary").toString());
-//                obj.put("salary",decryptedString);
-//            }
-//            System.out.println("Decrypted: "+data);
+            EmployeeList employeeList=defaultApi.listGet();
+            System.out.println("Decrypted: "+this.cipherAPI.decrypt(employeeList.getData().toString()));
         } catch (ApiException e) {
-//            System.out.println("Status code: " + e.getCode());
+            System.out.println("Status code: " + e.getCode());
             System.out.println("Reason: " + e.getResponseBody());
 
         }
@@ -159,17 +161,21 @@ class APILogicWithSSL extends APIWithSSL{
     //POST method to insert new Employee into Database
     public void createEmployee(String employeeId, String employeeName, String contact, String email, String salary){
 //        Create new Employee object to store employee details
-        Employee employee = new Employee();
-        employee.eid(employeeId);
-        employee.ename(employeeName);
-        employee.contact(contact);
-        employee.email(email);
-//        String encryptedString = this.cipherAPI.encrypt(sal);
-//        employee.salary(encryptedString);
-        employee.salary(salary);
-        employee.resume("");
+        String employeeJsonString="{\n" +
+                "  \"eid\": \""+employeeId+"\",\n" +
+                "  \"ename\": \""+employeeName+"\",\n" +
+                "  \"contact\": \""+contact+"\",\n" +
+                "  \"email\": \""+email+"\",\n" +
+                "  \"salary\": \""+salary+"\"\n" +
+                "}";
+        JSONObject employeeJson = new JSONObject(employeeJsonString);
+        System.out.println(employeeJson);
+        String encryptedString = this.cipherAPI.encrypt(employeeJson.toString());
+        EmployeePost employeePost=new EmployeePost();
+        employeePost.data(encryptedString);
+
         try{
-            Employee res=this.defaultApi.createPost(employee);
+            Employee res=this.defaultApi.createPost(employeePost);
             System.out.println(res);
         } catch (ApiException e) {
             System.out.println("Status code: " + e.getCode());
