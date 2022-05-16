@@ -6,12 +6,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
@@ -22,13 +19,10 @@ import org.wso2.client.api.*;
 import org.wso2.client.api.ApiClient;
 import org.wso2.client.api.ApiException;
 import org.wso2.client.api.EmployeeAPIM.DefaultApi;
-//import org.wso2.client.model.EmployeeAPIM.EmpArr;
 import org.wso2.client.model.EmployeeAPIM.Employee;
 import org.wso2.client.model.EmployeeAPIM.EmployeeList;
 import org.wso2.client.model.EmployeeAPIM.EmployeePost;
 import org.wso2.client.model.EmployeeAPIM.Update;
-
-import javax.net.ssl.*;
 
 public class APIWithSSL {
 
@@ -48,7 +42,6 @@ public class APIWithSSL {
         this.cacheManager = CacheManager.newInstance();
         this.cache = cacheManager.getCache(appProperty.getProperty("cacheName"));
         String cacheElementName=appProperty.getProperty("cacheElementName");
-//        this.cache.put(new Element("accessToken",null));
         Interceptor renewTokenInterceptor = new Interceptor() {
             private Element cacheElement;
             public Response intercept(Chain chain) throws IOException {
@@ -161,14 +154,14 @@ class APILogicWithSSL extends APIWithSSL{
     //POST method to insert new Employee into Database
     public void createEmployee(String employeeId, String employeeName, String contact, String email, String salary){
 //        Create new Employee object to store employee details
-        String employeeJsonString="{\n" +
-                "  \"eid\": \""+employeeId+"\",\n" +
-                "  \"ename\": \""+employeeName+"\",\n" +
-                "  \"contact\": \""+contact+"\",\n" +
-                "  \"email\": \""+email+"\",\n" +
-                "  \"salary\": \""+salary+"\"\n" +
-                "}";
-        JSONObject employeeJson = new JSONObject(employeeJsonString);
+        Employee employee=new Employee();
+        employee.eid(employeeId);
+        employee.ename(employeeName);
+        employee.contact(contact);
+        employee.email(email);
+        employee.salary(salary);
+//        System.out.println(employee);
+        JSONObject employeeJson = new JSONObject(employee);
         System.out.println(employeeJson);
         String encryptedString = this.cipherAPI.encrypt(employeeJson.toString());
         EmployeePost employeePost=new EmployeePost();

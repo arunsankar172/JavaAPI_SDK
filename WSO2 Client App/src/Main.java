@@ -20,7 +20,7 @@ class Main{
 //download <employeeId>
 
         if(args.length>0) {
-            System.out.println(args.length);
+//            System.out.println(args.length);
             APILogicWithSSL apiLogic = new APILogicWithSSL();
             switch (args[0]) {
                 case "list":
